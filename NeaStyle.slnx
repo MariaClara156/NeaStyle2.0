@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="NeaStyle.Api/NeaStyle.Api.csproj" />
+  <Project Path="NeaStyle.Shared/NeaStyle.Shared.csproj" />
+  <Project Path="NeaStyle.Web/NeaStyle.Web.csproj" />
+</Solution>
