@@ -28,6 +28,8 @@ public partial class NeaStyleContext : DbContext
 
     public virtual DbSet<ItensPedido> ItensPedidos { get; set; }
 
+    public virtual DbSet<MovimentacoesEstoque> MovimentacoesEstoques { get; set; }
+
     public virtual DbSet<Pagamento> Pagamentos { get; set; }
 
     public virtual DbSet<Pedido> Pedidos { get; set; }
@@ -108,7 +110,7 @@ public partial class NeaStyleContext : DbContext
         {
             entity.HasKey(e => e.ItemPedidoId);
 
-            entity.ToTable("ItensPedido");
+            entity.ToTable("ItensPedido", tb => tb.HasTrigger("trg_ItensPedido_BaixarEstoque"));
 
             entity.HasIndex(e => e.PedidoId, "IX_ItensPedido_PedidoId");
 
@@ -118,10 +120,27 @@ public partial class NeaStyleContext : DbContext
             entity.HasOne(d => d.Pedido).WithMany(p => p.ItensPedidos).HasForeignKey(d => d.PedidoId);
         });
 
+        modelBuilder.Entity<MovimentacoesEstoque>(entity =>
+        {
+            entity.HasKey(e => e.MovimentacaoId).HasName("PK__Moviment__509C01B5F5EF2890");
+
+            entity.ToTable("MovimentacoesEstoque");
+
+            entity.Property(e => e.MovimentacaoId).HasColumnName("MovimentacaoID");
+            entity.Property(e => e.DataMovimentacao).HasDefaultValueSql("(sysdatetime())");
+            entity.Property(e => e.TipoMovimentacao).HasMaxLength(50);
+
+            entity.HasOne(d => d.ProdutoVariacao).WithMany(p => p.MovimentacoesEstoques)
+                .HasForeignKey(d => d.ProdutoVariacaoId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_MovimentacoesEstoque_ProdutoVariacoes");
+        });
+
         modelBuilder.Entity<Pagamento>(entity =>
         {
             entity.HasIndex(e => e.PedidoId, "IX_Pagamentos_PedidoId");
 
+            entity.Property(e => e.DataPagamento).HasDefaultValueSql("(sysdatetime())");
             entity.Property(e => e.ValorPago).HasColumnType("decimal(18, 2)");
 
             entity.HasOne(d => d.Pedido).WithMany(p => p.Pagamentos).HasForeignKey(d => d.PedidoId);
@@ -146,6 +165,7 @@ public partial class NeaStyleContext : DbContext
 
         modelBuilder.Entity<Produto>(entity =>
         {
+            entity.Property(e => e.Ativo).HasDefaultValue(true);
             entity.Property(e => e.Descricao).HasDefaultValue("");
         });
 
@@ -153,8 +173,11 @@ public partial class NeaStyleContext : DbContext
         {
             entity.HasKey(e => e.ProdutoVariacaoId);
 
+            entity.ToTable(tb => tb.HasTrigger("trg_ProdutoVariacoes_AuditarEstoque"));
+
             entity.HasIndex(e => e.ProdutoId, "IX_ProdutoVariacoes_ProdutoId");
 
+            entity.Property(e => e.EstoqueMinimo).HasDefaultValue(5);
             entity.Property(e => e.Preco).HasColumnType("decimal(18, 2)");
             entity.Property(e => e.PrecoCusto).HasColumnType("decimal(18, 2)");
 
