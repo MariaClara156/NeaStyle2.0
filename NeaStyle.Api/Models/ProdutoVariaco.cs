@@ -21,7 +21,11 @@ public partial class ProdutoVariaco
 
     public decimal PrecoCusto { get; set; }
 
+    public int EstoqueMinimo { get; set; }
+
     public virtual ICollection<ItensConjunto> ItensConjuntos { get; set; } = new List<ItensConjunto>();
+
+    public virtual ICollection<MovimentacoesEstoque> MovimentacoesEstoques { get; set; } = new List<MovimentacoesEstoque>();
 
     public virtual Produto Produto { get; set; } = null!;
 }

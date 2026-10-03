@@ -17,5 +17,7 @@ public partial class Pagamento
 
     public decimal ValorPago { get; set; }
 
+    public DateTime? DataPagamento { get; set; }
+
     public virtual Pedido Pedido { get; set; } = null!;
 }
